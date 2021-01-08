@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Toolbelt.Blazor.Extensions.DependencyInjection;
 
 namespace OneSmallStep
 {
@@ -28,6 +29,8 @@ namespace OneSmallStep
         {
             services.AddRazorPages();
             services.AddServerSideBlazor();
+            services.AddSpeechSynthesis();
+            services.AddEventAggregator();
             services.AddSingleton<WeatherForecastService>();
         }
 

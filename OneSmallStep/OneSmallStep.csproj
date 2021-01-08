@@ -4,4 +4,13 @@
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="EventAggregator.Blazor" Version="2.0.0" />
+    <PackageReference Include="Toolbelt.Blazor.SpeechSynthesis" Version="8.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\OneSmallStep.Database\OneSmallStep.Database.csproj" />
+  </ItemGroup>
+
 </Project>

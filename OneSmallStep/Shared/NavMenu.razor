@@ -1,5 +1,10 @@
-﻿<div class="top-row pl-4 navbar navbar-dark">
-    <a class="navbar-brand" href="">OneSmallStep</a>
+﻿@using OneSmallStep.Database.Models
+@using OneSmallStep.Database
+@using Toolbelt.Blazor.SpeechSynthesis
+@inject SpeechSynthesis SpeechSynthesis
+
+<div class="top-row pl-4 navbar navbar-dark">
+    <a class="navbar-brand" href="">sktl</a>
     <button class="navbar-toggler" @onclick="ToggleNavMenu">
         <span class="navbar-toggler-icon"></span>
     </button>
@@ -7,21 +12,32 @@
 
 <div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
     <ul class="nav flex-column">
-        <li class="nav-item px-3">
+        @*<li class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
                 <span class="oi oi-home" aria-hidden="true"></span> Home
             </NavLink>
         </li>
+
         <li class="nav-item px-3">
             <NavLink class="nav-link" href="counter">
                 <span class="oi oi-plus" aria-hidden="true"></span> Counter
             </NavLink>
         </li>
+
         <li class="nav-item px-3">
-            <NavLink class="nav-link" href="fetchdata">
+            <NavLink class="nav-link">
                 <span class="oi oi-list-rich" aria-hidden="true"></span> Fetch data
             </NavLink>
-        </li>
+        </li>*@
+        
+        @foreach (var recipe in _recipes)
+        {
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" @onmouseover="async () => await Speak(recipe.Title)">
+                    <span class="oi oi-list-rich" aria-hidden="true"></span> @recipe.Title
+                </NavLink>
+            </li>
+        }
     </ul>
 </div>
 
@@ -30,8 +46,40 @@
 
     private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
 
+    private List<Recipe> _recipes = new List<Recipe>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            await base.OnInitializedAsync();
+            _recipes = GetRecipes();
+        }
+        catch (Exception ex)
+        {
+        }
+    }
+
     private void ToggleNavMenu()
     {
         collapseNavMenu = !collapseNavMenu;
+    }
+
+    private List<Recipe> GetRecipes()
+    {
+        try
+        {
+            using var context = new OneSmallStepContext("C:\\Git\\Personal\\OneSmallStep\\OneSmallStep.Database\\sktl.db");
+            return context.Recipes.ToList();
+        }
+        catch (Exception ex)
+        {
+            return null;
+        }
+    }
+
+    private async Task Speak(string text)
+    {
+        SpeechSynthesis.Speak(text);
     }
 }
