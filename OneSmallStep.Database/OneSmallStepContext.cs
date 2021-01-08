@@ -13,7 +13,6 @@ namespace OneSmallStep.Database
         public DbSet<Ingredient> Ingredients { get; set; }
         public DbSet<Step> Steps { get; set; }
 
-
         protected override void OnConfiguring(DbContextOptionsBuilder options)
             => options.UseSqlite("Data Source=oss.db");
     }
