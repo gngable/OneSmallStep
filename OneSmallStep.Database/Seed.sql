@@ -27,16 +27,15 @@ values ('Ramen Noodles', 'How to cook a package of ramen noodle soup');
 
 insert into Ingredients (RecipeId, IngredientCategoryId, Name, Quantity, Unit)
 values (2, 1, 'Pot', 1, 'Quart')
-	, (2, 1, 'Measuring Cup', 1, 'Quart')
-	, (2, 2, 'Ramen Noodles', 1, 'Package');
+	, (2, 1, 'Measuring Cup', 0, null)
+	, (2, 2, 'Ramen Noodle', 1, 'Package');
 	
 insert into Steps (RecipeId, Rank, Text, NextButtonText, TimerSeconds)
 values (2, 0, 'Use the measuring cup to measure 2 cups of water from the sink', null, null)
 	, (2, 10, 'Pour the water into the pot', null, null)
 	, (2, 20, 'Put the pot on the stove', null, null)
 	, (2, 30, 'Turn the burner under the pot on as high as it will go', 'Stove is on', null)
-	, (2, 40, 'Open the package of Ramen', null, null)
-	, (2, 50, 'Take out the seasoning packet', null, null)
+	, (2, 40, 'Open the package of Ramen and take out the seasoning packet', null, null)
 	, (2, 60, 'Wait for the water to boil', 'Water is boiling', null)
 	, (2, 70, 'Carefully put the noodles into the water', null, null)
 	, (2, 80, 'Turn the burner down so that the water is simmering', null, null)

@@ -1,7 +1,38 @@
-﻿@page "/"
+﻿@using Toolbelt.Blazor.SpeechSynthesis
+@inject SpeechSynthesis SpeechSynthesis
 
-<h1>Hello, world!</h1>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col d-flex justify-content-center">
+            <h1>@Welcome</h1>
+        </div>
+    </div>
+    
+    <div class="row"></div>
+    <div class="row"></div>
+    
+    <div class="row mt-5">
+        <div class="col d-flex justify-content-start">
+            <p><span class="oi oi-arrow-thick-left" aria-hidden="true"></span> @GetStarted</p>
+        </div>
+    </div>
 
-Welcome to your new app.
+</div>
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+@code
+{
+    private const string Welcome = "Welcome to sktl!";
+    private const string GetStarted = "To get started select a recipe on the left";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+
+        if (firstRender)
+        {
+            await Task.Delay(500);
+            SpeechSynthesis.Speak(Welcome);
+            SpeechSynthesis.Speak(GetStarted);
+        }
+    }
+}

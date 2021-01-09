@@ -1,4 +1,9 @@
 ﻿@inherits LayoutComponentBase
+@using OneSmallStep.Events
+@using OneSmallStep.Pages
+@using EventAggregator.Blazor
+@implements IHandle<OneSmallStep.Events.StartRecipeEvent>
+@inject IEventAggregator EventAggregator
 
 <div class="page">
     <div class="sidebar">
@@ -11,7 +16,45 @@
         </div>
 
         <div class="content px-4">
-            @Body
+            @if (!_recipe.HasValue)
+            {
+                <OneSmallStep.Pages.Index/>
+            }
+            else
+            {
+                <Recipe RecipeId="@_recipe.Value"></Recipe>
+            }
         </div>
     </div>
 </div>
+
+@code
+{
+    private int? _recipe;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            await base.OnInitializedAsync();
+            EventAggregator.Subscribe(this);
+        }
+        catch (Exception ex)
+        {
+        }
+    }
+
+    public async Task HandleAsync(StartRecipeEvent recipe)
+    {
+        _recipe = recipe.RecipeId;
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    public async Task HandleAsync(RecipeFinishedEvent recipe)
+    {
+        _recipe = null;
+
+        await InvokeAsync(StateHasChanged);
+    }
+}

@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using OneSmallStep.ViewModels;
 using Toolbelt.Blazor.Extensions.DependencyInjection;
 
 namespace OneSmallStep
@@ -31,7 +32,7 @@ namespace OneSmallStep
             services.AddServerSideBlazor();
             services.AddSpeechSynthesis();
             services.AddEventAggregator();
-            services.AddSingleton<WeatherForecastService>();
+            services.AddScoped<RecipeViewModel>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
