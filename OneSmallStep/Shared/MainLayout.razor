@@ -4,6 +4,8 @@
 @using EventAggregator.Blazor
 @implements IHandle<OneSmallStep.Events.StartRecipeEvent>
 @implements IHandle<OneSmallStep.Events.RecipeFinishedEvent>
+@implements IHandle<OneSmallStep.Events.ThinkingStartEvent>
+@implements IHandle<OneSmallStep.Events.ThinkingDoneEvent>
 @inject IEventAggregator EventAggregator
 
 <div class="page">
@@ -16,7 +18,7 @@
             <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
         </div>
 
-        <div class="content px-4">
+        <div class="content px-4 position-relative">
             @if (!_recipe.HasValue)
             {
                 if (!_noRender)
@@ -29,6 +31,17 @@
                 <Recipe RecipeId="@_recipe.Value"></Recipe>
             }
         </div>
+        
+        @if (_thinking)
+        {
+            <div class="semi-opaque-overlay" />
+
+            <div class="d-flex flex-row justify-content-center transparent-overlay">
+                <div class="d-flex flex-column justify-content-center">
+                    <h1>Thinking...</h1>
+                </div>
+            </div>
+        }
     </div>
 </div>
 
@@ -36,6 +49,8 @@
 {
     private int? _recipe;
     private bool _noRender = false;
+
+    private bool _thinking = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -68,6 +83,18 @@
     {
         _recipe = null;
 
+        await InvokeAsync(StateHasChanged);
+    }
+
+    public async Task HandleAsync(ThinkingStartEvent thinkingStart)
+    {
+        _thinking = true;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    public async Task HandleAsync(ThinkingDoneEvent thinkingDone)
+    {
+        _thinking = false;
         await InvokeAsync(StateHasChanged);
     }
 }

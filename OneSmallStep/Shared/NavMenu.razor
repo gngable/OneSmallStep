@@ -106,6 +106,10 @@
 
     private async Task StartRecipe(int recipeId)
     {
+        await EventAggregator.PublishAsync(new ThinkingStartEvent());
+        await Task.Delay(1000);
+        await EventAggregator.PublishAsync(new ThinkingDoneEvent());
+
         _currentRecipeId = recipeId;
         await EventAggregator.PublishAsync(new StartRecipeEvent{RecipeId = recipeId});
     }

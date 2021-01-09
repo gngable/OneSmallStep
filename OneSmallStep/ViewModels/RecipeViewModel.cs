@@ -94,9 +94,13 @@ namespace OneSmallStep.ViewModels
             }
         }
 
-        public void StartRecipe()
+        public async Task StartRecipe()
         {
             if (_speechSynthesis.Speaking) _speechSynthesis.Cancel();
+
+            await _eventAggregator.PublishAsync(new ThinkingStartEvent());
+            await Task.Delay(1000);
+            await _eventAggregator.PublishAsync(new ThinkingDoneEvent());
 
             CurrentState = Ingredients.Any() ? State.IngredientStart : State.StepStart;
 
@@ -105,9 +109,14 @@ namespace OneSmallStep.ViewModels
             CurrentIndex = 0;
         }
 
-        public void StartIngredients()
+        public async Task StartIngredients()
         {
             if (_speechSynthesis.Speaking) _speechSynthesis.Cancel();
+
+            await _eventAggregator.PublishAsync(new ThinkingStartEvent());
+            await Task.Delay(1000);
+            await _eventAggregator.PublishAsync(new ThinkingDoneEvent());
+
             CurrentState = State.Ingredients;
             CurrentIngredient = Ingredients.First();
             IngredientChecked = false;
@@ -115,9 +124,13 @@ namespace OneSmallStep.ViewModels
             _speechSynthesis.Speak(IngredientLabel);
         }
 
-        public void NextIngredient()
+        public async Task NextIngredient()
         {
             if (_speechSynthesis.Speaking) _speechSynthesis.Cancel();
+
+            await _eventAggregator.PublishAsync(new ThinkingStartEvent());
+            await Task.Delay(1000);
+            await _eventAggregator.PublishAsync(new ThinkingDoneEvent());
 
             CurrentIndex++;
 
@@ -144,8 +157,14 @@ namespace OneSmallStep.ViewModels
             _speechSynthesis.Speak(IngredientLabel);
         }
 
-        public void PreviousIngredient()
+        public async Task PreviousIngredient()
         {
+            if (_speechSynthesis.Speaking) _speechSynthesis.Cancel();
+
+            await _eventAggregator.PublishAsync(new ThinkingStartEvent());
+            await Task.Delay(1000);
+            await _eventAggregator.PublishAsync(new ThinkingDoneEvent());
+
             if (CurrentIndex == 0)
             {
                 CurrentState = State.IngredientStart;
@@ -160,9 +179,13 @@ namespace OneSmallStep.ViewModels
             _speechSynthesis.Speak(IngredientLabel);
         }
 
-        public void StartSteps()
+        public async Task StartSteps()
         {
             if (_speechSynthesis.Speaking) _speechSynthesis.Cancel();
+
+            await _eventAggregator.PublishAsync(new ThinkingStartEvent());
+            await Task.Delay(1000);
+            await _eventAggregator.PublishAsync(new ThinkingDoneEvent());
 
             CurrentState = State.Steps;
             CurrentStep = Steps.First();
@@ -175,6 +198,10 @@ namespace OneSmallStep.ViewModels
             StopTimer();
 
             if (_speechSynthesis.Speaking) _speechSynthesis.Cancel();
+
+            await _eventAggregator.PublishAsync(new ThinkingStartEvent());
+            await Task.Delay(1000);
+            await _eventAggregator.PublishAsync(new ThinkingDoneEvent());
 
             CurrentIndex++;
 
@@ -201,9 +228,15 @@ namespace OneSmallStep.ViewModels
             _speechSynthesis.Speak(CurrentStep.Text);
         }
 
-        public void PreviousStep()
+        public async Task PreviousStep()
         {
             StopTimer();
+
+            if (_speechSynthesis.Speaking) _speechSynthesis.Cancel();
+
+            await _eventAggregator.PublishAsync(new ThinkingStartEvent());
+            await Task.Delay(1000);
+            await _eventAggregator.PublishAsync(new ThinkingDoneEvent());
 
             if (CurrentIndex == 0)
             {
@@ -218,8 +251,14 @@ namespace OneSmallStep.ViewModels
             _speechSynthesis.Speak(CurrentStep.Text);
         }
 
-        public void StepStartBack()
+        public async Task StepStartBack()
         {
+            if (_speechSynthesis.Speaking) _speechSynthesis.Cancel();
+
+            await _eventAggregator.PublishAsync(new ThinkingStartEvent());
+            await Task.Delay(1000);
+            await _eventAggregator.PublishAsync(new ThinkingDoneEvent());
+
             CurrentState = State.Ingredients;
 
             CurrentIndex = Ingredients.Count - 1;
