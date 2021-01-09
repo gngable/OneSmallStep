@@ -142,7 +142,7 @@ namespace OneSmallStep.ViewModels
             _speechSynthesis.Speak(CurrentStep.Text);
         }
 
-        public void NextStep()
+        public async Task NextStep()
         {
             if (_speechSynthesis.Speaking) _speechSynthesis.Cancel();
 
@@ -150,7 +150,7 @@ namespace OneSmallStep.ViewModels
 
             if (CurrentIndex >= Steps.Count)
             {
-                _eventAggregator.PublishAsync(new RecipeFinishedEvent());
+                await _eventAggregator.PublishAsync(new RecipeFinishedEvent());
 
                 return;
             }

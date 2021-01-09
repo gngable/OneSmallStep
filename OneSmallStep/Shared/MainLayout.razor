@@ -3,6 +3,7 @@
 @using OneSmallStep.Pages
 @using EventAggregator.Blazor
 @implements IHandle<OneSmallStep.Events.StartRecipeEvent>
+@implements IHandle<OneSmallStep.Events.RecipeFinishedEvent>
 @inject IEventAggregator EventAggregator
 
 <div class="page">
@@ -18,7 +19,10 @@
         <div class="content px-4">
             @if (!_recipe.HasValue)
             {
-                <OneSmallStep.Pages.Index/>
+                if (!_noRender)
+                {
+                    <OneSmallStep.Pages.Index/>
+                }
             }
             else
             {
@@ -31,6 +35,7 @@
 @code
 {
     private int? _recipe;
+    private bool _noRender = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -46,6 +51,14 @@
 
     public async Task HandleAsync(StartRecipeEvent recipe)
     {
+        if (_recipe != null)
+        {
+            _noRender = true;
+            await HandleAsync(new RecipeFinishedEvent());
+            await Task.Delay(10);
+            _noRender = false;
+        }
+
         _recipe = recipe.RecipeId;
 
         await InvokeAsync(StateHasChanged);

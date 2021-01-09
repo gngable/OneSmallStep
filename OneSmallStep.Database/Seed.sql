@@ -8,8 +8,8 @@ values ('Boil Water', 'How to boil water');
 
 insert into Ingredients (RecipeId, IngredientCategoryId, Name, Quantity, Unit)
 values (1, 1, 'Pot', 1, 'Quart')
-	, (1, 1, 'Measuring Cup', 1, 'Quart')
-	, (1, 2, 'Water', 2, 'Cups');
+	, (1, 1, 'Measuring Cup', 0, null)
+	, (1, 2, 'Water from sink', 0, null);
 	
 insert into Steps (RecipeId, Rank, Text, NextButtonText)
 values (1, 0, 'Use the measuring cup to measure 2 cups of water from the sink', null)

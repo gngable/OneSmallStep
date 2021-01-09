@@ -100,7 +100,7 @@
             </div>
 
             <div class="col d-flex justify-content-end">
-                <button class="btn btn-primary m-3" @onclick="() => { ViewModel.NextStep(); StateHasChanged(); }">@(string.IsNullOrEmpty(ViewModel.CurrentStep.NextButtonText) ? Next : ViewModel.CurrentStep.NextButtonText) <span class="oi oi-media-skip-forward" aria-hidden="true"></span></button>
+                <button class="btn btn-primary m-3" @onclick="async () => { await ViewModel.NextStep(); StateHasChanged(); }">@(string.IsNullOrEmpty(ViewModel.CurrentStep.NextButtonText) ? Next : ViewModel.CurrentStep.NextButtonText) <span class="oi oi-media-skip-forward" aria-hidden="true"></span></button>
             </div>
         }
     </div>
