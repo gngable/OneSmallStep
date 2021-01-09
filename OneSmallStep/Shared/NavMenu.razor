@@ -5,6 +5,7 @@
 @using OneSmallStep.Events
 @inject SpeechSynthesis SpeechSynthesis
 @inject IEventAggregator EventAggregator
+@implements IHandle<OneSmallStep.Events.RecipeFinishedEvent>
 
 <div class="top-row pl-4 navbar navbar-dark">
     <a class="navbar-brand" href="">sktl</a>
@@ -35,11 +36,22 @@
         
         @foreach (var recipe in _recipes)
         {
-            <li class="nav-item px-3">
-                <NavLink class="nav-link" @onmouseover="() => Speak(recipe.Title)" @onclick="async () => await StartRecipe(recipe.Id)">
-                    @recipe.Title
-                </NavLink>
-            </li>
+            if (recipe.Id == _currentRecipeId)
+            {
+                <li class="nav-item px-3">
+                    <NavLink class="nav-link border border-light rounded font-weight-bold" @onmouseover="() => Speak(recipe.Title)">
+                        <h5>@recipe.Title</h5>
+                    </NavLink>
+                </li>
+            }
+            else
+            {
+                <li class="nav-item px-3">
+                    <NavLink class="nav-link font-weight-bold" @onmouseover="() => Speak(recipe.Title)" @onclick="async () => await StartRecipe(recipe.Id)">
+                        <h5>@recipe.Title</h5>
+                    </NavLink>
+                </li>
+            }
         }
     </ul>
 </div>
@@ -51,12 +63,16 @@
 
     private List<Recipe> _recipes = new List<Recipe>();
 
+    private int? _currentRecipeId = null;
+
+
     protected override async Task OnInitializedAsync()
     {
         try
         {
             await base.OnInitializedAsync();
             _recipes = GetRecipes();
+            EventAggregator.Subscribe(this);
         }
         catch (Exception ex)
         {
@@ -90,7 +106,14 @@
 
     private async Task StartRecipe(int recipeId)
     {
+        _currentRecipeId = recipeId;
         await EventAggregator.PublishAsync(new StartRecipeEvent{RecipeId = recipeId});
     }
 
+    public async Task HandleAsync(RecipeFinishedEvent recipe)
+    {
+        _currentRecipeId = null;
+
+        await InvokeAsync(StateHasChanged);
+    }
 }

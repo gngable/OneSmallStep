@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using EventAggregator.Blazor;
 using Microsoft.EntityFrameworkCore;
@@ -11,10 +13,14 @@ using Toolbelt.Blazor.SpeechSynthesis;
 
 namespace OneSmallStep.ViewModels
 {
-    public class RecipeViewModel
+    public class RecipeViewModel : INotifyPropertyChanged
     {
         private readonly SpeechSynthesis _speechSynthesis;
         private readonly IEventAggregator _eventAggregator;
+        private string _timerLabel;
+        private DateTime? _timerStart = null;
+        private DateTime? _timerEnd = null;
+        private bool _timerRunning;
 
         public const string IngredientStartText = "Let's get some things together";
         public const string StepStartText = "Let's start cooking!";
@@ -42,6 +48,27 @@ namespace OneSmallStep.ViewModels
         public State CurrentState { get; set; } = State.Start;
         public int CurrentIndex { get; set; }
 
+        public string TimerLabel
+        {
+            get => _timerLabel;
+            set
+            {
+                _timerLabel = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        public bool TimerRunning
+        {
+            get => _timerRunning;
+            set
+            {
+                _timerRunning = value;
+                RaisePropertyChanged();
+            }
+        }
+
+
         public RecipeViewModel(SpeechSynthesis speechSynthesis, IEventAggregator eventAggregator)
         {
             _speechSynthesis = speechSynthesis;
@@ -52,6 +79,7 @@ namespace OneSmallStep.ViewModels
         {
             try
             {
+                StopTimer();
                 if (_speechSynthesis.Speaking) _speechSynthesis.Cancel();
                 using var context = new OneSmallStepContext { DatabasePath = "C:\\Git\\Personal\\OneSmallStep\\OneSmallStep.Database\\sktl.db" };
                 Recipe = context.Recipes.FirstOrDefault(r => r.Id == RecipeId);
@@ -144,6 +172,8 @@ namespace OneSmallStep.ViewModels
 
         public async Task NextStep()
         {
+            StopTimer();
+
             if (_speechSynthesis.Speaking) _speechSynthesis.Cancel();
 
             CurrentIndex++;
@@ -157,6 +187,11 @@ namespace OneSmallStep.ViewModels
 
             CurrentStep = Steps[CurrentIndex];
 
+            if (CurrentStep.TimerSeconds.HasValue)
+            {
+                StartTimer(CurrentStep.TimerSeconds.Value);
+            }
+
             _speechSynthesis.Speak(CurrentStep.Text);
         }
 
@@ -168,6 +203,8 @@ namespace OneSmallStep.ViewModels
 
         public void PreviousStep()
         {
+            StopTimer();
+
             if (CurrentIndex == 0)
             {
                 CurrentState = State.StepStart;
@@ -191,6 +228,82 @@ namespace OneSmallStep.ViewModels
             IngredientChecked = false;
 
             _speechSynthesis.Speak(IngredientLabel);
+        }
+
+        private void StartTimer(int seconds)
+        {
+            _timerStart = DateTime.Now;
+            _timerEnd = _timerStart.Value.AddSeconds(seconds);
+            TimerRunning = true;
+
+            Task.Run(TimerLoop);
+        }
+
+        private void StopTimer()
+        {
+            TimerRunning = false;
+        }
+
+        private async Task TimerLoop()
+        {
+            try
+            {
+                bool endReached = false;
+                DateTime lastEndNotify = DateTime.Now;
+
+                while (TimerRunning)
+                {
+                    if (DateTime.Now > _timerEnd.Value && !endReached)
+                    {
+                        TimerLabel = "00:00";
+                        endReached = true;
+                        _speechSynthesis.Speak("Time is up");
+                        lastEndNotify = DateTime.Now;
+                    }
+                    else if (DateTime.Now > _timerEnd.Value && (DateTime.Now - lastEndNotify).TotalSeconds >= 10)
+                    {
+                        _speechSynthesis.Speak("Time is up");
+                        lastEndNotify = DateTime.Now;
+                    }
+                    else
+                    {
+                        var ts = (_timerEnd.Value - DateTime.Now);
+
+                        string time = "";
+
+                        if (ts.Hours > 0)
+                        {
+                            time = $"{ts.Hours} hours, {ts.Minutes} minutes, {ts.Seconds} seconds left";
+                        }
+                        else if (ts.Minutes > 0)
+                        {
+                            time = $"{ts.Minutes} minutes, {ts.Seconds} seconds left";
+                        }
+                        else
+                        {
+                            time = $"{ts.Seconds} seconds left";
+                        }
+
+                        if (!string.Equals(time, TimerLabel))
+                        {
+                            TimerLabel = time;
+                        }
+                    }
+
+                    await Task.Delay(50);
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        protected virtual void RaisePropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

@@ -28,7 +28,7 @@ values ('Ramen Noodles', 'How to cook a package of ramen noodle soup');
 insert into Ingredients (RecipeId, IngredientCategoryId, Name, Quantity, Unit)
 values (2, 1, 'Pot', 1, 'Quart')
 	, (2, 1, 'Measuring Cup', 0, null)
-	, (2, 2, 'Ramen Noodle', 1, 'Package');
+	, (2, 2, 'Ramen Noodles', 1, 'Package');
 	
 insert into Steps (RecipeId, Rank, Text, NextButtonText, TimerSeconds)
 values (2, 0, 'Use the measuring cup to measure 2 cups of water from the sink', null, null)
