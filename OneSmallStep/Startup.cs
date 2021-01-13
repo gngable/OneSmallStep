@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using BlazorStrap;
 using OneSmallStep.ViewModels;
 using Toolbelt.Blazor.Extensions.DependencyInjection;
 
@@ -32,6 +33,7 @@ namespace OneSmallStep
             services.AddServerSideBlazor();
             services.AddSpeechSynthesis();
             services.AddEventAggregator();
+            services.AddBootstrapCss();
             services.AddScoped<RecipeViewModel>();
         }
 

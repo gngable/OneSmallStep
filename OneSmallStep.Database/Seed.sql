@@ -1,10 +1,13 @@
 insert into IngredientCategories (Name, Rank)
 values ('Tools', 0), ('Ingredients', 1);
 
+insert into Category (Title, Description)
+values ('Test', 'Test Recipes')
+
 ------------------------------------------------------
 
-insert into Recipes (Title, Description)
-values ('Boil Water', 'How to boil water');
+insert into Recipes (Title, Description, CategoryId)
+values ('Boil Water', 'How to boil water', 1);
 
 insert into Ingredients (RecipeId, IngredientCategoryId, Name, Quantity, Unit)
 values (1, 1, 'Pot', 1, 'Quart')
@@ -22,8 +25,8 @@ values (1, 0, 'Use the measuring cup to measure 2 cups of water from the sink', 
 
 ------------------------------------------------------
 
-insert into Recipes (Title, Description)
-values ('Ramen Noodles', 'How to cook a package of ramen noodle soup');
+insert into Recipes (Title, Description, CategoryId)
+values ('Ramen Noodles', 'How to cook a package of ramen noodle soup', 1);
 
 insert into Ingredients (RecipeId, IngredientCategoryId, Name, Quantity, Unit)
 values (2, 1, 'Pot', 1, 'Quart')

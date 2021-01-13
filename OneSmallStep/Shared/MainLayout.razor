@@ -6,6 +6,7 @@
 @implements IHandle<OneSmallStep.Events.RecipeFinishedEvent>
 @implements IHandle<OneSmallStep.Events.ThinkingStartEvent>
 @implements IHandle<OneSmallStep.Events.ThinkingDoneEvent>
+@implements IHandle<OneSmallStep.Events.StartCustomRecipeEvent>
 @inject IEventAggregator EventAggregator
 
 <div class="page">
@@ -19,16 +20,20 @@
         </div>
 
         <div class="content px-4 position-relative">
-            @if (!_recipe.HasValue)
+            @if(_recipe.HasValue)
+            {
+                <Recipe RecipeId="@_recipe.Value"></Recipe>
+            }
+            else if (_customRecipe)
+            {
+                <CustomRecipe></CustomRecipe>
+            }
+            else
             {
                 if (!_noRender)
                 {
                     <OneSmallStep.Pages.Index/>
                 }
-            }
-            else
-            {
-                <Recipe RecipeId="@_recipe.Value"></Recipe>
             }
         </div>
         
@@ -38,7 +43,18 @@
 
             <div class="d-flex flex-row justify-content-center transparent-overlay">
                 <div class="d-flex flex-column justify-content-center">
-                    <h1>Thinking...</h1>
+                    <div class="container-fluid" style="height: 100%;">
+                        <div class="row justify-content-center align-items-center" style="height: 100%">
+                            <div class="col-auto container busy-indicator-box">
+                                <div class="row justify-content-center">
+                                    <div class="col-auto"><span class="oi oi-reload busy-indicator rotate-element"  aria-hidden="true"></span></div>
+                                </div>
+                                <div class="row justify-content-center pt-2">
+                                    <div class="col-auto busy-indicator-text">Thinking...</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         }
@@ -51,6 +67,8 @@
     private bool _noRender = false;
 
     private bool _thinking = false;
+
+    private bool _customRecipe = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -75,6 +93,7 @@
         }
 
         _recipe = recipe.RecipeId;
+        _customRecipe = false;
 
         await InvokeAsync(StateHasChanged);
     }
@@ -82,6 +101,7 @@
     public async Task HandleAsync(RecipeFinishedEvent recipe)
     {
         _recipe = null;
+        _customRecipe = false;
 
         await InvokeAsync(StateHasChanged);
     }
@@ -95,6 +115,14 @@
     public async Task HandleAsync(ThinkingDoneEvent thinkingDone)
     {
         _thinking = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    public async Task HandleAsync(StartCustomRecipeEvent startCustomRecipeEvent)
+    {
+        _thinking = false;
+        _customRecipe = true;
+        _recipe = null;
         await InvokeAsync(StateHasChanged);
     }
 }

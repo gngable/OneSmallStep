@@ -1,0 +1,107 @@
+﻿@using BlazorStrap
+@using System.Threading
+
+<BSModal @ref="GenericModal" IsCentered="true" IgnoreClickOnBackdrop="true" IgnoreEscape="true" id="@($"GenericModal-{id}")">
+
+    <BSModalHeader class="tertiary-colors-light" OnClick="@(() => _closeAction?.Invoke())" id="@($"GenericModalHeader-{id}")">@Title</BSModalHeader>
+
+    <BSModalBody class="tertiary-colors">
+        @ChildContent
+    </BSModalBody>
+
+    <BSModalFooter class="tertiary-colors-light">
+        
+        @foreach (var button in ButtonEnvelopes)
+        {
+            <BSButton Color="Color.Primary" @onclick="@(() => button.Action.Invoke())" id="@($"GenericModalButton-{button.Text}-{id}")">@button.Text</BSButton>
+        }
+
+    </BSModalFooter>
+
+</BSModal>
+
+@code {
+    [Parameter]
+    public string id { get; set; } = Guid.NewGuid().ToString();
+
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    [Parameter]
+    public string Title { get; set; }
+
+    [Parameter]
+    public List<string> Buttons { get; set; } = new List<string>() {"Cancel", "Ok"};
+
+    [Parameter]
+    public string CloseButtonResponse { get; set; } = "Close";
+
+    private BSModal GenericModal { get; set; }
+
+    private class ButtonEnvelope
+    {
+        public string Text { get; set; }
+        public Action Action { get; set; }
+    }
+
+    private List<ButtonEnvelope> ButtonEnvelopes { get; }= new List<ButtonEnvelope>();
+    private Action _closeAction = null;
+    private object _sync = new object();
+
+    public void Close()
+    {
+        if (GenericModal.IsOpen == true)
+        {
+            GenericModal.Hide();
+            _closeAction?.Invoke();
+        }
+    }
+
+    public Task<string> ShowAsync()
+    {
+        string response = null;
+        ButtonEnvelopes.Clear();
+
+        _closeAction = () =>
+        {
+            lock (_sync)
+            {
+                response = CloseButtonResponse;
+                Monitor.PulseAll(_sync);
+            }
+        };
+
+        foreach (var button in Buttons)
+        {
+            ButtonEnvelopes.Add(new ButtonEnvelope
+            {
+                Text = button,
+                Action = () =>
+                {
+                    lock (_sync)
+                    {
+                        response = button;
+                        Monitor.PulseAll(_sync);
+                    }
+                }
+            });
+        }
+
+        GenericModal.Show();
+
+        return Task<string>.Factory.StartNew(() =>
+        {
+            lock (_sync)
+            {
+                while (response == null)
+                {
+                    Monitor.Wait(_sync);
+                }
+            }
+
+            GenericModal.Hide();
+
+            return response;
+        });
+    }
+}
