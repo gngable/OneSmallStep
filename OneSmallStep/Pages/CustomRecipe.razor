@@ -14,10 +14,21 @@
         </div>
     </div>
     
-    <div class="row d-flex align-items-stretch" style="height: calc(100vh - 321px)">
+    <div class="row d-flex align-items-stretch" style="height: calc(100vh - 321px); border-style: solid;">
         @if (ViewModel.CurrentStep == CustomRecipeViewModel.Step.Equipment || ViewModel.CurrentStep == CustomRecipeViewModel.Step.Ingredients || ViewModel.CurrentStep == CustomRecipeViewModel.Step.Steps)
         {
             <textarea @bind="ViewModel.TextEntry" class="w-100 h-100"></textarea>
+        }
+        else if (ViewModel.CurrentStep == CustomRecipeViewModel.Step.EquipmentConfirm || ViewModel.CurrentStep == CustomRecipeViewModel.Step.IngredientsConfirm || ViewModel.CurrentStep == CustomRecipeViewModel.Step.StepsConfirm)
+        {
+            <div class="container-fluid">
+                @foreach (var item in ViewModel.ConfirmList)
+                {
+                    <div class="row">
+                        <div class="col">@item</div>
+                    </div>
+                }
+            </div>
         }
     </div>
     

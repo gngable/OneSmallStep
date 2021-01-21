@@ -8,6 +8,10 @@ namespace OneSmallStep.ViewModels
 {
     public class CustomRecipeViewModel
     {
+        private string _equipmentText;
+        private string _ingredientText;
+        private string _stepText;
+
         public enum Step
         {
             Equipment,
@@ -24,12 +28,16 @@ namespace OneSmallStep.ViewModels
         public Step CurrentStep { get; set; }
 
         public string TextEntry { get; set; }
-        public List<string> ParsedTools { get; protected set; }
+        public List<string> ConfirmList { get; protected set; }
+
+        public List<string> ParsedEquipment { get; protected set; }
+        public List<string> ParsedIngredients { get; protected set; }
+        public List<string> ParsedSteps { get; protected set; }
 
         public async Task Initialize()
         {
             TextEntry = string.Empty;
-            ParsedTools = new List<string>();
+            ParsedEquipment = new List<string>();
 
             CurrentStep = Step.Equipment;
 
@@ -86,6 +94,9 @@ namespace OneSmallStep.ViewModels
             {
                 case CustomRecipeViewModel.Step.Equipment:
                 {
+                    _equipmentText = TextEntry;
+                    ParsedEquipment = ParseList(_equipmentText);
+                    ConfirmList = ParsedEquipment;
                     CurrentStep = Step.EquipmentConfirm;
                     break;
                 }
@@ -98,6 +109,8 @@ namespace OneSmallStep.ViewModels
 
                 case CustomRecipeViewModel.Step.Ingredients:
                 {
+                    _ingredientText = TextEntry;
+                    ParsedIngredients = ParseList(_ingredientText);
                     CurrentStep = Step.IngredientsConfirm;
                     break;
                 }
@@ -110,6 +123,8 @@ namespace OneSmallStep.ViewModels
 
                 case CustomRecipeViewModel.Step.Steps:
                 {
+                    _stepText = TextEntry;
+                    ParsedSteps = ParseList(_stepText, true);
                     CurrentStep = Step.StepsConfirm;
                     break;
                 }
@@ -132,13 +147,15 @@ namespace OneSmallStep.ViewModels
                 {
                     Title = "Equipment";
                     SubTitle = "Enter what tools you'll need below (Like pots, measuring cups, etc)";
-                        break;
+                    TextEntry = _equipmentText;
+                    break;
                 }
 
                 case CustomRecipeViewModel.Step.EquipmentConfirm:
                 {
                     Title = "Equipment";
                     SubTitle = "Here's what I understood. Does this look right?";
+                    ConfirmList = ParsedEquipment;
                     break;
                 }
 
@@ -146,20 +163,23 @@ namespace OneSmallStep.ViewModels
                 {
                     Title = "Ingredients";
                     SubTitle = "Now Enter the ingredients";
-                        break;
+                    TextEntry = _ingredientText;
+                    break;
                 }
 
                 case CustomRecipeViewModel.Step.IngredientsConfirm:
                 {
                     Title = "Ingredients";
                     SubTitle = "Here's what I understood. Does this look right?";
-                        break;
+                    ConfirmList = ParsedIngredients;
+                    break;
                 }
 
                 case CustomRecipeViewModel.Step.Steps:
                 {
                     Title = "Recipe";
                     SubTitle = "Now Enter the recipe steps";
+                    TextEntry = _stepText;
                         break;
                 }
 
@@ -167,11 +187,28 @@ namespace OneSmallStep.ViewModels
                 {
                     Title = "Recipe";
                     SubTitle = "Here's what I understood. Does this look right?";
-                        break;
+                    ConfirmList = ParsedSteps;
+                    break;
                 }
-
-
             }
+        }
+
+        private List<string> ParseList(string input, bool includePeriod = false)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                return new List<string>();
+            }
+
+            var list = input.Split('\n').ToList();
+            list = list.Where(l => !string.IsNullOrWhiteSpace(l)).Select(l => l.Trim()).ToList();
+
+            if (includePeriod)
+            {
+                list = list.SelectMany(l => l.Split('.')).Select(l => l.Trim()).ToList();
+            }
+
+            return list;
         }
     }
 }
