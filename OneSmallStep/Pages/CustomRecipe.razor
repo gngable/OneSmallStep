@@ -1,5 +1,42 @@
-﻿<h3>CustomRecipe</h3>
+﻿@using OneSmallStep.ViewModels
+@using Toolbelt.Blazor.SpeechSynthesis
+@inject CustomRecipeViewModel ViewModel
+@inject SpeechSynthesis SpeechSynthesis
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col d-flex justify-content-center my-4">
+            <div class="d-flex-col justify-content-center">
+                <h1>@ViewModel.Title</h1>
+                <br/>
+                <p>@ViewModel.SubTitle</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row d-flex align-items-stretch" style="height: calc(100vh - 321px)">
+        @if (ViewModel.CurrentStep == CustomRecipeViewModel.Step.Equipment || ViewModel.CurrentStep == CustomRecipeViewModel.Step.Ingredients || ViewModel.CurrentStep == CustomRecipeViewModel.Step.Steps)
+        {
+            <textarea @bind="ViewModel.TextEntry" class="w-100 h-100"></textarea>
+        }
+    </div>
+    
+    <div class="row">
+    
+        <div class="col d-flex justify-content-start">
+            <button class="btn btn-lg btn-primary m-3" @onclick="async () => { await ViewModel.Back(); StateHasChanged(); }"><span class="oi oi-media-step-backward mr-2" aria-hidden="true"></span> Back</button>
+        </div>
+
+        <div class="col d-flex justify-content-end">
+            <button class="btn btn-lg btn-success m-3" @onclick="async () => { await ViewModel.Forward(); StateHasChanged(); }"><span class="oi oi-media-step-forward ml-2" aria-hidden="true"></span> Next</button>
+        </div>
+    </div>
+</div>
 
 @code {
-
+    protected override async Task OnInitializedAsync()
+    {
+        await ViewModel.Initialize();
+        StateHasChanged();
+    }
 }

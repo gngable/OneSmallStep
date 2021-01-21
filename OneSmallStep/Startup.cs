@@ -35,6 +35,7 @@ namespace OneSmallStep
             services.AddEventAggregator();
             services.AddBootstrapCss();
             services.AddScoped<RecipeViewModel>();
+            services.AddScoped<CustomRecipeViewModel>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
