@@ -2,7 +2,7 @@ insert into IngredientCategories (Name, Rank)
 values ('Tools', 0), ('Ingredients', 1);
 
 insert into Category (Title, Description)
-values ('Test', 'Test Recipes')
+values ('Test', 'Test Recipes'), ('Transient', 'Transient Recipes');
 
 ------------------------------------------------------
 

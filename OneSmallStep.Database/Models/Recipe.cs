@@ -12,6 +12,8 @@ namespace OneSmallStep.Database.Models
 
         public int CategoryId { get; set; }
         public Category Category { get; set; }
+        public DateTime? ExpirationDate { get; set; }
+        public string AccessCode { get; set; }
 
     }
 }

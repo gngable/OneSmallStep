@@ -8,6 +8,7 @@ namespace OneSmallStep.Database
 {
     public class OneSmallStepContext : DbContext
     {
+        public DbSet<Category> Category { get; set; }
         public DbSet<Recipe> Recipes { get; set; }
         public DbSet<IngredientCategory> IngredientCategories { get; set; }
         public DbSet<Ingredient> Ingredients { get; set; }

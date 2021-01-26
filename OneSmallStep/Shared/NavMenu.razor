@@ -3,6 +3,7 @@
 @using Toolbelt.Blazor.SpeechSynthesis
 @using EventAggregator.Blazor
 @using OneSmallStep.Events
+@using OneSmallStep.Utilities
 @inject SpeechSynthesis SpeechSynthesis
 @inject IEventAggregator EventAggregator
 @implements IHandle<OneSmallStep.Events.RecipeFinishedEvent>
@@ -79,7 +80,7 @@
         try
         {
             using var context = new OneSmallStepContext{DatabasePath = "C:\\Git\\Personal\\OneSmallStep\\OneSmallStep.Database\\sktl.db"};
-            return context.Recipes.ToList();
+            return context.Recipes.Where(r => !r.ExpirationDate.HasValue).ToList();
         }
         catch (Exception ex)
         {
@@ -96,9 +97,7 @@
 
     private async Task StartRecipe(int recipeId)
     {
-        await EventAggregator.PublishAsync(new ThinkingStartEvent());
-        await Task.Delay(ThinkTime);
-        await EventAggregator.PublishAsync(new ThinkingDoneEvent());
+        await EventAggregator.Think();
 
         _currentRecipeId = recipeId;
         await EventAggregator.PublishAsync(new StartRecipeEvent{RecipeId = recipeId});
@@ -113,9 +112,7 @@
 
     private async Task MakeYourOwn()
     {
-        await EventAggregator.PublishAsync(new ThinkingStartEvent());
-        await Task.Delay(ThinkTime);
-        await EventAggregator.PublishAsync(new ThinkingDoneEvent());
+        await EventAggregator.Think();
 
         _currentRecipeId = null;
         await EventAggregator.PublishAsync(new StartCustomRecipeEvent());

@@ -3,23 +3,33 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
+using EventAggregator.Blazor;
+using OneSmallStep.Database;
+using OneSmallStep.Database.Models;
+using OneSmallStep.Events;
+using OneSmallStep.Utilities;
 
 namespace OneSmallStep.ViewModels
 {
     public class CustomRecipeViewModel
     {
+        private readonly IEventAggregator _eventAggregator;
+        private string _recipeDescription;
         private string _equipmentText;
         private string _ingredientText;
         private string _stepText;
+        private int _recipeId;
 
         public enum Step
         {
+            Title,
             Equipment,
             EquipmentConfirm,
             Ingredients,
             IngredientsConfirm,
             Steps,
             StepsConfirm,
+            Code
         }
 
         public string Title { get; set; }
@@ -27,19 +37,27 @@ namespace OneSmallStep.ViewModels
 
         public Step CurrentStep { get; set; }
 
+        public string RecipeTitle { get; set; }
         public string TextEntry { get; set; }
         public List<string> ConfirmList { get; protected set; }
 
         public List<string> ParsedEquipment { get; protected set; }
         public List<string> ParsedIngredients { get; protected set; }
         public List<string> ParsedSteps { get; protected set; }
+        public string Code { get; set; }
+        public bool CanGoBack => CurrentStep != Step.Title && CurrentStep != Step.Code;
+
+        public CustomRecipeViewModel(IEventAggregator eventAggregator)
+        {
+            _eventAggregator = eventAggregator;
+        }
 
         public async Task Initialize()
         {
             TextEntry = string.Empty;
             ParsedEquipment = new List<string>();
 
-            CurrentStep = Step.Equipment;
+            CurrentStep = Step.Title;
 
             await SetupStep();
         }
@@ -48,9 +66,15 @@ namespace OneSmallStep.ViewModels
         {
             switch (CurrentStep)
             {
+                case CustomRecipeViewModel.Step.Title:
+                {
+                    CurrentStep = Step.Title;
+                    break;
+                }
+
                 case CustomRecipeViewModel.Step.Equipment:
                 {
-                    CurrentStep = Step.Equipment;
+                    CurrentStep = Step.Title;
                     break;
                 }
 
@@ -92,6 +116,13 @@ namespace OneSmallStep.ViewModels
         {
             switch (CurrentStep)
             {
+                case CustomRecipeViewModel.Step.Title:
+                {
+                    _recipeDescription = TextEntry;
+                    CurrentStep = Step.Equipment;
+                    break;
+                }
+
                 case CustomRecipeViewModel.Step.Equipment:
                 {
                     _equipmentText = TextEntry;
@@ -131,8 +162,16 @@ namespace OneSmallStep.ViewModels
 
                 case CustomRecipeViewModel.Step.StepsConfirm:
                 {
-                    CurrentStep = Step.StepsConfirm;
+                    CurrentStep = Step.Code;
+                    Code = AlphaStringGenerator.RandomString(4);
                     break;
+                }
+
+                case CustomRecipeViewModel.Step.Code:
+                {
+                    //Start Transient
+                    await _eventAggregator.PublishAsync(new StartRecipeEvent { RecipeId = _recipeId });
+                    return;
                 }
             }
 
@@ -143,6 +182,14 @@ namespace OneSmallStep.ViewModels
         {
             switch (CurrentStep)
             {
+                case CustomRecipeViewModel.Step.Title:
+                {
+                    Title = "Recipe";
+                    SubTitle = "What's the name of the recipe?";
+                    TextEntry = _recipeDescription;
+                    break;
+                }
+
                 case CustomRecipeViewModel.Step.Equipment:
                 {
                     Title = "Equipment";
@@ -190,6 +237,14 @@ namespace OneSmallStep.ViewModels
                     ConfirmList = ParsedSteps;
                     break;
                 }
+
+                case CustomRecipeViewModel.Step.Code:
+                {
+                    Title = $"Code = {Code}";
+                    SubTitle = "You can use this code for 2 days to access this recipe, or just click next to start now!";
+                    await SaveRecipe();
+                    break;
+                }
             }
         }
 
@@ -209,6 +264,69 @@ namespace OneSmallStep.ViewModels
             }
 
             return list;
+        }
+
+        private async Task SaveRecipe()
+        {
+            using var context = new OneSmallStepContext { DatabasePath = "C:\\Git\\Personal\\OneSmallStep\\OneSmallStep.Database\\sktl.db" };
+
+            var recipe = new Recipe();
+            recipe.AccessCode = Code;
+            recipe.ExpirationDate = DateTime.UtcNow.AddDays(2);
+
+            recipe.Title = RecipeTitle;
+            recipe.Description = _recipeDescription;
+
+            var category = context.Category.First(c => c.Title == "Transient");
+
+            recipe.CategoryId = category.Id;
+
+            await context.Recipes.AddAsync(recipe);
+            await context.SaveChangesAsync();
+
+            recipe = context.Recipes.First(r => r.AccessCode == Code);
+            _recipeId = recipe.Id;
+            var equipmentCategory = context.IngredientCategories.First(c => c.Name == "Tools");
+
+            foreach (var equipment in ParsedEquipment)
+            {
+                var ingredient = new Ingredient();
+                ingredient.Name = equipment;
+                ingredient.IngredientCategoryId = equipmentCategory.Id;
+                ingredient.RecipeId = recipe.Id;
+
+                await context.Ingredients.AddAsync(ingredient);
+            }
+
+            await context.SaveChangesAsync();
+
+            var ingredientCategory = context.IngredientCategories.First(c => c.Name == "Ingredients");
+
+            foreach (var ingredient in ParsedIngredients)
+            {
+                var ing = new Ingredient();
+                ing.Name = ingredient;
+                ing.IngredientCategoryId = ingredientCategory.Id;
+                ing.RecipeId = recipe.Id;
+
+                await context.Ingredients.AddAsync(ing);
+            }
+
+            await context.SaveChangesAsync();
+
+            int i = 0;
+            foreach (var step in ParsedSteps)
+            {
+                var s = new OneSmallStep.Database.Models.Step();
+
+                s.Text = step;
+                s.Rank = i++;
+                s.RecipeId = recipe.Id;
+
+                await context.Steps.AddAsync(s);
+            }
+
+            await context.SaveChangesAsync();
         }
     }
 }

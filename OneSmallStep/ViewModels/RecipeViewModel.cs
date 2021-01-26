@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using OneSmallStep.Database;
 using OneSmallStep.Database.Models;
 using OneSmallStep.Events;
+using OneSmallStep.Utilities;
 using Toolbelt.Blazor.SpeechSynthesis;
 
 namespace OneSmallStep.ViewModels
@@ -99,9 +100,7 @@ namespace OneSmallStep.ViewModels
         {
             if (_speechSynthesis.Speaking) _speechSynthesis.Cancel();
 
-            await _eventAggregator.PublishAsync(new ThinkingStartEvent());
-            await Task.Delay(ThinkTime);
-            await _eventAggregator.PublishAsync(new ThinkingDoneEvent());
+            await _eventAggregator.Think();
 
             CurrentState = Ingredients.Any() ? State.IngredientStart : State.StepStart;
 
@@ -114,9 +113,7 @@ namespace OneSmallStep.ViewModels
         {
             if (_speechSynthesis.Speaking) _speechSynthesis.Cancel();
 
-            await _eventAggregator.PublishAsync(new ThinkingStartEvent());
-            await Task.Delay(ThinkTime);
-            await _eventAggregator.PublishAsync(new ThinkingDoneEvent());
+            await _eventAggregator.Think();
 
             CurrentState = State.Ingredients;
             CurrentIngredient = Ingredients.First();
@@ -129,9 +126,7 @@ namespace OneSmallStep.ViewModels
         {
             if (_speechSynthesis.Speaking) _speechSynthesis.Cancel();
 
-            await _eventAggregator.PublishAsync(new ThinkingStartEvent());
-            await Task.Delay(ThinkTime);
-            await _eventAggregator.PublishAsync(new ThinkingDoneEvent());
+            await _eventAggregator.Think();
 
             CurrentIndex++;
 
@@ -162,9 +157,7 @@ namespace OneSmallStep.ViewModels
         {
             if (_speechSynthesis.Speaking) _speechSynthesis.Cancel();
 
-            await _eventAggregator.PublishAsync(new ThinkingStartEvent());
-            await Task.Delay(ThinkTime);
-            await _eventAggregator.PublishAsync(new ThinkingDoneEvent());
+            await _eventAggregator.Think();
 
             if (CurrentIndex == 0)
             {
@@ -184,9 +177,7 @@ namespace OneSmallStep.ViewModels
         {
             if (_speechSynthesis.Speaking) _speechSynthesis.Cancel();
 
-            await _eventAggregator.PublishAsync(new ThinkingStartEvent());
-            await Task.Delay(ThinkTime);
-            await _eventAggregator.PublishAsync(new ThinkingDoneEvent());
+            await _eventAggregator.Think();
 
             CurrentState = State.Steps;
             CurrentStep = Steps.First();
@@ -200,9 +191,7 @@ namespace OneSmallStep.ViewModels
 
             if (_speechSynthesis.Speaking) _speechSynthesis.Cancel();
 
-            await _eventAggregator.PublishAsync(new ThinkingStartEvent());
-            await Task.Delay(ThinkTime);
-            await _eventAggregator.PublishAsync(new ThinkingDoneEvent());
+            await _eventAggregator.Think();
 
             CurrentIndex++;
 
@@ -235,9 +224,7 @@ namespace OneSmallStep.ViewModels
 
             if (_speechSynthesis.Speaking) _speechSynthesis.Cancel();
 
-            await _eventAggregator.PublishAsync(new ThinkingStartEvent());
-            await Task.Delay(ThinkTime);
-            await _eventAggregator.PublishAsync(new ThinkingDoneEvent());
+            await _eventAggregator.Think();
 
             if (CurrentIndex == 0)
             {
@@ -256,9 +243,7 @@ namespace OneSmallStep.ViewModels
         {
             if (_speechSynthesis.Speaking) _speechSynthesis.Cancel();
 
-            await _eventAggregator.PublishAsync(new ThinkingStartEvent());
-            await Task.Delay(ThinkTime);
-            await _eventAggregator.PublishAsync(new ThinkingDoneEvent());
+            await _eventAggregator.Think();
 
             CurrentState = State.Ingredients;
 

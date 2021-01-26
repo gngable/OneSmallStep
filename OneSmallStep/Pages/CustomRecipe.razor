@@ -15,17 +15,29 @@
     </div>
     
     <div class="row d-flex align-items-stretch" style="height: calc(100vh - 321px); border-style: solid;">
-        @if (ViewModel.CurrentStep == CustomRecipeViewModel.Step.Equipment || ViewModel.CurrentStep == CustomRecipeViewModel.Step.Ingredients || ViewModel.CurrentStep == CustomRecipeViewModel.Step.Steps)
+        @if (ViewModel.CurrentStep == CustomRecipeViewModel.Step.Title)
         {
-            <textarea @bind="ViewModel.TextEntry" class="w-100 h-100"></textarea>
+            <div class="col d-flex flex-column justify-content-start align-items-center my-4 w-100">
+                @*<div class="d-flex flex-column justify-content-center align-items-stretch w-100" style="background-color: blanchedalmond">*@
+                    <h3 class="mx-5 mt-3">Recipe Title</h3>
+                    <input @bind="ViewModel.RecipeTitle" class="mx-5 w-100"/>
+
+                    <h3 class="mx-5 mt-5">Recipe Description</h3>
+                    <textarea @bind="ViewModel.TextEntry" rows="5" class="mx-5 w-100"/>
+                @*</div>*@
+            </div>
+        }
+        else if (ViewModel.CurrentStep == CustomRecipeViewModel.Step.Equipment || ViewModel.CurrentStep == CustomRecipeViewModel.Step.Ingredients || ViewModel.CurrentStep == CustomRecipeViewModel.Step.Steps)
+        {
+            <textarea @bind="ViewModel.TextEntry" class="w-100 h-100"/>
         }
         else if (ViewModel.CurrentStep == CustomRecipeViewModel.Step.EquipmentConfirm || ViewModel.CurrentStep == CustomRecipeViewModel.Step.IngredientsConfirm || ViewModel.CurrentStep == CustomRecipeViewModel.Step.StepsConfirm)
         {
             <div class="container-fluid">
                 @foreach (var item in ViewModel.ConfirmList)
                 {
-                    <div class="row">
-                        <div class="col">@item</div>
+                    <div class="row m-2 border">
+                        <div class="col"><h4>@item</h4></div>
                     </div>
                 }
             </div>
@@ -33,13 +45,16 @@
     </div>
     
     <div class="row">
-    
+        
         <div class="col d-flex justify-content-start">
-            <button class="btn btn-lg btn-primary m-3" @onclick="async () => { await ViewModel.Back(); StateHasChanged(); }"><span class="oi oi-media-step-backward mr-2" aria-hidden="true"></span> Back</button>
+            @if (ViewModel.CanGoBack)
+            {
+                <button class="btn btn-lg btn-primary m-3" @onclick="async () => { await ViewModel.Back();StateHasChanged(); }"><span class="oi oi-media-step-backward mr-2" aria-hidden="true"></span> Back</button>
+            }
         </div>
 
         <div class="col d-flex justify-content-end">
-            <button class="btn btn-lg btn-success m-3" @onclick="async () => { await ViewModel.Forward(); StateHasChanged(); }"><span class="oi oi-media-step-forward ml-2" aria-hidden="true"></span> Next</button>
+            <button class="btn btn-lg btn-success m-3" @onclick="async () => { await ViewModel.Forward(); StateHasChanged(); }">Next <span class="oi oi-media-step-forward ml-2" aria-hidden="true"></span></button>
         </div>
     </div>
 </div>
