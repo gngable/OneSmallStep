@@ -58,6 +58,7 @@ namespace OneSmallStep.ViewModels
             ParsedEquipment = new List<string>();
 
             CurrentStep = Step.Title;
+            Code = string.Empty;
 
             await SetupStep();
         }
@@ -120,6 +121,19 @@ namespace OneSmallStep.ViewModels
                 {
                     _recipeDescription = TextEntry;
                     CurrentStep = Step.Equipment;
+
+                    if (!string.IsNullOrWhiteSpace(Code))
+                    {
+                        using var context = new OneSmallStepContext { DatabasePath = "C:\\Git\\Personal\\OneSmallStep\\OneSmallStep.Database\\sktl.db" };
+
+                        var recipe = context.Recipes.FirstOrDefault(r => r.AccessCode == Code);
+
+                        if (recipe != null)
+                        {
+                            await _eventAggregator.PublishAsync(new StartRecipeEvent { RecipeId = recipe.Id });
+                        }
+                    }
+
                     break;
                 }
 
